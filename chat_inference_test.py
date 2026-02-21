@@ -8,7 +8,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Users should point this to their local mlabonne/gemma-3-12b-it-abliterated directory
 MODEL_PATH = "mlabonne/gemma-3-12b-it-abliterated" 
-ADAPTER_PATH = os.path.join(PROJECT_DIR, "otitans_adapter.pt")
+ADAPTER_PATH = os.path.join(PROJECT_DIR, "otitans_logic_core_v1.pt")
 
 # Bring in the O-TITANS core sculpting logic
 sys.path.append(PROJECT_DIR)
@@ -29,10 +29,10 @@ def main():
     print("[*] Reconstructing Orthogonal Architecture...")
     # Replicating the sculpting parameters: q_proj and v_proj isolation.
     targets = ["q_proj", "v_proj"]
-    replaced_layers = inject_orthogonal_memory(model, target_modules=targets, rank=8, alpha=16.0)
+    replaced_layers = inject_orthogonal_memory(model, target_modules=targets, rank=16, alpha=32.0)
     
     # Ensure all grafted layers are aligned to the GPU bus.
-    model.to(torch.bfloat16)
+    model.to(torch.bfloat16).to(model.device)
     
     print(f"[*] Loading O-TITANS memory states from {ADAPTER_PATH}...")
     # Weights_only=True is a critical security protocol for public releases.
